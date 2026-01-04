@@ -1,472 +1,496 @@
 // ====== KONFIGURATION ======
 const CONFIG = {
-  city: 'Trollhättan',
-  country: 'SE',
-  apiKey: '073b784fec004c9e4c9d07dfaac9d689',
-  updateInterval: 300000, // 5 minuter
-  language: 'sv',
-  units: 'metric'
+    city: 'Trollhättan',
+    country: 'SE',
+    apiKey: '073b784fec004c9e4c9d07dfaac9d689',
+    updateInterval: 300000, // 5 minuter
+    units: 'metric',
+    language: 'sv'
+};
+
+// Väderikoner mappning
+const WEATHER_ICONS = {
+    // Clear
+    '01d': 'fas fa-sun',
+    '01n': 'fas fa-moon',
+    
+    // Few clouds
+    '02d': 'fas fa-cloud-sun',
+    '02n': 'fas fa-cloud-moon',
+    
+    // Scattered clouds
+    '03d': 'fas fa-cloud',
+    '03n': 'fas fa-cloud',
+    
+    // Broken clouds
+    '04d': 'fas fa-cloud',
+    '04n': 'fas fa-cloud',
+    
+    // Shower rain
+    '09d': 'fas fa-cloud-showers-heavy',
+    '09n': 'fas fa-cloud-showers-heavy',
+    
+    // Rain
+    '10d': 'fas fa-cloud-rain',
+    '10n': 'fas fa-cloud-rain',
+    
+    // Thunderstorm
+    '11d': 'fas fa-bolt',
+    '11n': 'fas fa-bolt',
+    
+    // Snow
+    '13d': 'fas fa-snowflake',
+    '13n': 'fas fa-snowflake',
+    
+    // Mist
+    '50d': 'fas fa-smog',
+    '50n': 'fas fa-smog'
+};
+
+// Väderklasser för bakgrundsbilder
+const WEATHER_CLASSES = {
+    'clear': 'clear',
+    'clouds': 'clouds',
+    'rain': 'rain',
+    'drizzle': 'rain',
+    'thunderstorm': 'thunderstorm',
+    'snow': 'snow',
+    'mist': 'mist',
+    'smoke': 'mist',
+    'haze': 'mist',
+    'dust': 'mist',
+    'fog': 'mist',
+    'sand': 'mist',
+    'ash': 'mist',
+    'squall': 'windy',
+    'tornado': 'windy'
 };
 
 // Svensk översättning av väderförhållanden
 const WEATHER_TRANSLATIONS = {
-  'clear sky': 'Klart himmel',
-  'few clouds': 'Lätt molnig',
-  'scattered clouds': 'Växlande molnig',
-  'broken clouds': 'Mulet',
-  'overcast clouds': 'Mulet',
-  'mist': 'Dimma',
-  'fog': 'Tät dimma',
-  'light rain': 'Lätt regn',
-  'moderate rain': 'Regn',
-  'heavy rain': 'Kraftigt regn',
-  'light snow': 'Lätt snöfall',
-  'snow': 'Snöfall',
-  'heavy snow': 'Kraftigt snöfall',
-  'light shower': 'Lätt skur',
-  'shower': 'Skur',
-  'heavy shower': 'Kraftig skur',
-  'thunderstorm': 'Åska',
-  'haze': 'Disigt',
-  'dust': 'Dammigt',
-  'smoke': 'Rökigt',
-  'sand': 'Sandstorm'
-};
-
-// Ikonmappning
-const WEATHER_ICONS = {
-  'clear': 'fas fa-sun',
-  'clouds': 'fas fa-cloud',
-  'rain': 'fas fa-cloud-rain',
-  'snow': 'fas fa-snowflake',
-  'thunderstorm': 'fas fa-bolt',
-  'drizzle': 'fas fa-cloud-rain',
-  'mist': 'fas fa-smog',
-  'smoke': 'fas fa-smog',
-  'haze': 'fas fa-smog',
-  'dust': 'fas fa-smog',
-  'fog': 'fas fa-smog',
-  'sand': 'fas fa-wind',
-  'ash': 'fas fa-volcano',
-  'squall': 'fas fa-wind',
-  'tornado': 'fas fa-tornado'
+    'clear sky': 'Klart',
+    'few clouds': 'Lätt molnig',
+    'scattered clouds': 'Spridda moln',
+    'broken clouds': 'Mulet',
+    'overcast clouds': 'Mulet',
+    'shower rain': 'Regnskurar',
+    'rain': 'Regn',
+    'thunderstorm': 'Åska',
+    'snow': 'Snö',
+    'mist': 'Dimma',
+    'fog': 'Dimma',
+    'haze': 'Disigt',
+    'dust': 'Dammigt',
+    'smoke': 'Rökigt',
+    'sand': 'Sandstorm',
+    'ash': 'Aska',
+    'squall': 'Byvind',
+    'tornado': 'Tornado',
+    'drizzle': 'Duggregn'
 };
 
 // ====== GLOBALA VARIABLER ======
-let currentWeatherData = null;
+let weatherData = null;
 let forecastData = null;
+let lastUpdateTime = null;
 
-// ====== HANTERA RESPONSIVITET ======
-function getCurrentBreakpoint() {
-  const width = window.innerWidth;
-  
-  if (width < 375) return 'xs';
-  if (width < 768) return 'sm';
-  if (width < 1024) return 'md';
-  if (width < 1280) return 'lg';
-  if (width < 1440) return 'xl';
-  if (width < 1920) return '2xl';
-  if (width < 2560) return '3xl';
-  return '4xl';
-}
+// ====== HUVUDFUNKTIONER ======
 
-function updateResponsiveLayout() {
-  const breakpoint = getCurrentBreakpoint();
-  
-  // Justera layout baserat på breakpoint
-  switch(breakpoint) {
-    case 'xs':
-    case 'sm':
-      document.body.classList.add('mobile-view');
-      document.body.classList.remove('tablet-view', 'desktop-view');
-      break;
-    case 'md':
-      document.body.classList.add('tablet-view');
-      document.body.classList.remove('mobile-view', 'desktop-view');
-      break;
-    default:
-      document.body.classList.add('desktop-view');
-      document.body.classList.remove('mobile-view', 'tablet-view');
-  }
-  
-  // Uppdatera solposition för aktuell skärmstorlek
-  if (currentWeatherData) {
-    updateSunPosition(currentWeatherData);
-  }
-}
-
-// ====== TID OCH DATUM ======
-function updateTime() {
-  const timeEl = document.getElementById('time');
-  const now = new Date();
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-  timeEl.textContent = `${hours}:${minutes}:${seconds}`;
-}
-
-function updateDate() {
-  const dateEl = document.getElementById('date');
-  const now = new Date();
-  const day = now.toLocaleDateString('sv-SE', { weekday: 'long' });
-  const date = now.getDate();
-  const month = now.toLocaleDateString('sv-SE', { month: 'long' });
-  const year = now.getFullYear();
-  
-  // Formatera datum
-  dateEl.textContent = `IDAG · ${date} ${month.toUpperCase()} ${year}`;
-}
-
-// ====== VÄDERDATA ======
-function translateWeather(description) {
-  const desc = description.toLowerCase();
-  for (const [key, value] of Object.entries(WEATHER_TRANSLATIONS)) {
-    if (desc.includes(key)) {
-      return value;
-    }
-  }
-  return description.charAt(0).toUpperCase() + description.slice(1);
-}
-
-function getWeatherIcon(weatherMain) {
-  return WEATHER_ICONS[weatherMain.toLowerCase()] || WEATHER_ICONS.clouds;
-}
-
-async function fetchWeatherData() {
-  const currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${CONFIG.city},${CONFIG.country}&appid=${CONFIG.apiKey}&units=${CONFIG.units}&lang=${CONFIG.language}`;
-  const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${CONFIG.city},${CONFIG.country}&appid=${CONFIG.apiKey}&units=${CONFIG.units}&lang=${CONFIG.language}`;
-  
-  try {
-    const [currentResponse, forecastResponse] = await Promise.all([
-      fetch(currentUrl),
-      fetch(forecastUrl)
-    ]);
+// Funktion för att uppdatera klockan
+function updateClock() {
+    const now = new Date();
     
-    if (!currentResponse.ok || !forecastResponse.ok) {
-      throw new Error(`API Error: ${currentResponse.status}`);
-    }
+    // Uppdatera tid
+    const timeElement = document.getElementById('time');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    timeElement.textContent = `${hours}:${minutes}:${seconds}`;
     
-    const currentData = await currentResponse.json();
-    const forecastData = await forecastResponse.json();
+    // Uppdatera datum
+    const dateElement = document.getElementById('date');
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateStr = now.toLocaleDateString('sv-SE', options);
+    dateElement.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     
-    return { current: currentData, forecast: forecastData };
-  } catch (error) {
-    console.error('Fel vid hämtning av väderdata:', error);
-    showError('Kunde inte hämta väderdata. Kontrollera internetanslutning.');
-    return null;
-  }
-}
-
-function updateSunPosition(weatherData) {
-  if (!weatherData || !weatherData.sys) return;
-  
-  const now = new Date();
-  const currentTime = now.getHours() * 60 + now.getMinutes(); // Minuter sedan midnatt
-  const sunrise = new Date(weatherData.sys.sunrise * 1000);
-  const sunset = new Date(weatherData.sys.sunset * 1000);
-  
-  const sunriseMinutes = sunrise.getHours() * 60 + sunrise.getMinutes();
-  const sunsetMinutes = sunset.getHours() * 60 + sunset.getMinutes();
-  
-  // Beräkna solposition (0-100%)
-  let position = 0;
-  if (currentTime >= sunriseMinutes && currentTime <= sunsetMinutes) {
-    const totalDaylight = sunsetMinutes - sunriseMinutes;
-    const currentDaylight = currentTime - sunriseMinutes;
-    position = (currentDaylight / totalDaylight) * 100;
-  } else if (currentTime < sunriseMinutes) {
-    position = 0;
-  } else {
-    position = 100;
-  }
-  
-  // Begränsa position
-  position = Math.max(5, Math.min(95, position));
-  
-  const sunElement = document.getElementById('sun-position');
-  if (sunElement) {
-    sunElement.style.left = `${position}%`;
-    
-    // Uppdatera "Nu" markören
-    const marker = document.querySelector('.sun-marker.now');
-    if (marker) {
-      marker.style.left = `${position}%`;
-    }
-  }
-  
-  // Beräkna dagljuslängd
-  const daylightHours = Math.floor((sunsetMinutes - sunriseMinutes) / 60);
-  const daylightMinutes = (sunsetMinutes - sunriseMinutes) % 60;
-  const nightHours = 24 - daylightHours;
-  const nightMinutes = 60 - daylightMinutes;
-  
-  document.getElementById('daylight-duration').textContent = `${daylightHours}h ${daylightMinutes}m`;
-  document.getElementById('night-duration').textContent = `${nightHours}h ${nightMinutes}m`;
-}
-
-function updateCurrentWeather(data) {
-  if (!data) return;
-  
-  currentWeatherData = data;
-  
-  const temp = Math.round(data.main.temp);
-  const feelsLike = Math.round(data.main.feels_like);
-  const description = translateWeather(data.weather[0].description);
-  const humidity = data.main.humidity;
-  const windSpeed = Math.round(data.wind.speed * 3.6); // m/s till km/h
-  const pressure = data.main.pressure;
-  const visibility = data.visibility ? Math.round(data.visibility / 1000) : 10;
-  const weatherMain = data.weather[0].main;
-  
-  // Uppdatera DOM
-  document.getElementById('current-temp').textContent = temp;
-  document.getElementById('feels-temp').textContent = `${feelsLike}°`;
-  document.getElementById('weather-condition').textContent = description;
-  document.getElementById('weather-description').textContent = `${description} i Trollhättan`;
-  document.getElementById('wind-speed').textContent = windSpeed;
-  document.getElementById('humidity').textContent = humidity;
-  document.getElementById('pressure').textContent = pressure;
-  document.getElementById('visibility').textContent = visibility;
-  
-  // Uppdatera ikon
-  const weatherIcon = document.getElementById('weather-icon');
-  weatherIcon.className = getWeatherIcon(weatherMain);
-  
-  // Uppdatera soltider
-  const sunrise = new Date(data.sys.sunrise * 1000);
-  const sunset = new Date(data.sys.sunset * 1000);
-  
-  document.getElementById('sunrise-time').textContent = 
-    `${String(sunrise.getHours()).padStart(2, '0')}:${String(sunrise.getMinutes()).padStart(2, '0')}`;
-  document.getElementById('sunset-time').textContent = 
-    `${String(sunset.getHours()).padStart(2, '0')}:${String(sunset.getMinutes()).padStart(2, '0')}`;
-  
-  // Uppdatera solposition
-  updateSunPosition(data);
-}
-
-function updateForecast(data) {
-  if (!data || !data.list) return;
-  
-  forecastData = data;
-  
-  const forecasts = data.list;
-  const dailyForecasts = {};
-  
-  // Gruppera prognoser per dag
-  forecasts.forEach(item => {
-    const date = new Date(item.dt * 1000);
-    const dateKey = date.toISOString().split('T')[0];
-    
-    if (!dailyForecasts[dateKey]) {
-      dailyForecasts[dateKey] = {
-        items: [],
-        date: date
-      };
-    }
-    
-    dailyForecasts[dateKey].items.push(item);
-  });
-  
-  // Skapa array med 5 dagar
-  const forecastDays = Object.values(dailyForecasts)
-    .sort((a, b) => a.date - b.date)
-    .slice(1, 6); // Hoppa över idag, ta nästa 5 dagar
-  
-  const cardsContainer = document.getElementById('forecast-cards');
-  
-  // Generera kort baserat på skärmstorlek
-  const breakpoint = getCurrentBreakpoint();
-  const cardsPerView = breakpoint === 'xs' ? 3 : breakpoint === 'sm' ? 4 : 5;
-  
-  const cardsHTML = forecastDays.slice(0, cardsPerView).map(day => {
-    // Beräkna medeltemperatur
-    const temps = day.items.map(item => item.main.temp);
-    const avgTemp = Math.round(temps.reduce((a, b) => a + b) / temps.length);
-    
-    // Hitta middagsprognosen
-    const middayItem = day.items.find(item => {
-      const hour = new Date(item.dt * 1000).getHours();
-      return hour >= 11 && hour <= 13;
-    }) || day.items[Math.floor(day.items.length / 2)];
-    
-    const dayName = day.date.toLocaleDateString('sv-SE', { weekday: 'short' });
-    const dateStr = day.date.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
-    const condition = translateWeather(middayItem.weather[0].description);
-    const iconClass = getWeatherIcon(middayItem.weather[0].main);
-    const feelsLike = Math.round(middayItem.main.feels_like);
-    const humidity = middayItem.main.humidity;
-    const windSpeed = Math.round(middayItem.wind.speed * 3.6);
-    
-    return `
-      <div class="forecast-card fade-in">
-        <div class="forecast-day">${dayName.toUpperCase()}</div>
-        <div class="forecast-date">${dateStr}</div>
-        <div class="forecast-icon">
-          <i class="${iconClass}"></i>
-        </div>
-        <div class="forecast-temp">${avgTemp}°</div>
-        <div class="forecast-condition">${condition}</div>
-        <div class="forecast-details">
-          <div class="forecast-detail">
-            <span class="detail-label">Känns som:</span>
-            <span class="detail-value">${feelsLike}°</span>
-          </div>
-          <div class="forecast-detail">
-            <span class="detail-label">Fuktighet:</span>
-            <span class="detail-value">${humidity}%</span>
-          </div>
-          <div class="forecast-detail">
-            <span class="detail-label">Vind:</span>
-            <span class="detail-value">${windSpeed} km/h</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-  
-  cardsContainer.innerHTML = cardsHTML;
-}
-
-function showError(message) {
-  const forecastContainer = document.getElementById('forecast-cards');
-  forecastContainer.innerHTML = `
-    <div class="error-state" style="grid-column: 1 / -1;">
-      <i class="fas fa-exclamation-triangle"></i>
-      <h3>${message}</h3>
-      <button onclick="refreshWeather()" class="retry-btn">
-        <i class="fas fa-redo"></i> Försök igen
-      </button>
-    </div>
-  `;
-}
-
-async function refreshWeather() {
-  const weatherData = await fetchWeatherData();
-  if (weatherData) {
-    updateCurrentWeather(weatherData.current);
-    updateForecast(weatherData.forecast);
-    updateLastUpdated();
-  }
-}
-
-function updateLastUpdated() {
-  const now = new Date();
-  const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-  document.getElementById('last-updated').textContent = timeStr;
-}
-
-// ====== SÄSONGSDETEKTERING ======
-function getCurrentSeason() {
-  const now = new Date();
-  const month = now.getMonth() + 1;
-  
-  if (month >= 12 || month <= 2) return 'winter';
-  if (month >= 3 && month <= 5) return 'spring';
-  if (month >= 6 && month <= 8) return 'summer';
-  return 'autumn';
-}
-
-function applySeasonalTheme() {
-  const season = getCurrentSeason();
-  const bgContainer = document.getElementById('seasonal-background');
-  
-  // Ta bort alla säsongsklasser
-  bgContainer.classList.remove('winter', 'spring', 'summer', 'autumn');
-  
-  // Lägg till aktuell säsongsklass
-  bgContainer.classList.add(season);
-}
-
-// ====== INITIERING ======
-async function init() {
-  // Applicera säsongstema
-  applySeasonalTheme();
-  
-  // Uppdatera layout baserat på skärmstorlek
-  updateResponsiveLayout();
-  
-  // Uppdatera tid och datum
-  updateTime();
-  updateDate();
-  
-  // Hämta väderdata
-  const weatherData = await fetchWeatherData();
-  if (weatherData) {
-    updateCurrentWeather(weatherData.current);
-    updateForecast(weatherData.forecast);
-    updateLastUpdated();
-  }
-  
-  // Sätt uppdateringsintervall
-  setInterval(updateTime, 1000);
-  setInterval(updateDate, 60000);
-  setInterval(async () => {
-    const weatherData = await fetchWeatherData();
+    // Uppdatera solposition om vi har data
     if (weatherData) {
-      updateCurrentWeather(weatherData.current);
-      updateForecast(weatherData.forecast);
-      updateLastUpdated();
+        updateSunPosition(now);
     }
-  }, CONFIG.updateInterval);
-  
-  // Uppdatera layout vid fönsterstorleksändring
-  window.addEventListener('resize', () => {
-    updateResponsiveLayout();
-    if (forecastData) {
-      updateForecast(forecastData);
-    }
-  });
-  
-  // Uppdatera säsongstema varje timme
-  setInterval(applySeasonalTheme, 3600000);
 }
 
-// ====== EVENT LISTENERS ======
-document.addEventListener('DOMContentLoaded', init);
-
-// Manuell uppdatering med knapp eller tangentbord
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'u' || e.key === 'U') {
-    refreshWeather();
-  }
-});
-
-// Hantera forecast navigation
-document.querySelector('.prev-btn')?.addEventListener('click', () => {
-  const container = document.querySelector('.forecast-cards');
-  container.scrollBy({ left: -300, behavior: 'smooth' });
-});
-
-document.querySelector('.next-btn')?.addEventListener('click', () => {
-  const container = document.querySelector('.forecast-cards');
-  container.scrollBy({ left: 300, behavior: 'smooth' });
-});
-
-// Touch/swipe support för mobil
-let touchStartX = 0;
-let touchEndX = 0;
-
-document.querySelector('.forecast-cards')?.addEventListener('touchstart', (e) => {
-  touchStartX = e.changedTouches[0].screenX;
-});
-
-document.querySelector('.forecast-cards')?.addEventListener('touchend', (e) => {
-  touchEndX = e.changedTouches[0].screenX;
-  handleSwipe();
-});
-
-function handleSwipe() {
-  const threshold = 50;
-  const diff = touchStartX - touchEndX;
-  
-  if (Math.abs(diff) > threshold) {
-    if (diff > 0) {
-      // Swipe vänster
-      document.querySelector('.forecast-cards').scrollBy({ left: 300, behavior: 'smooth' });
+// Funktion för att uppdatera solposition
+function updateSunPosition(currentTime) {
+    if (!weatherData || !weatherData.sys) return;
+    
+    const sunrise = new Date(weatherData.sys.sunrise * 1000);
+    const sunset = new Date(weatherData.sys.sunset * 1000);
+    
+    const dayLength = sunset - sunrise;
+    const currentPos = currentTime - sunrise;
+    
+    let percentage = 0;
+    if (currentPos > 0 && currentPos < dayLength) {
+        percentage = (currentPos / dayLength) * 100;
+    } else if (currentPos <= 0) {
+        percentage = 0;
     } else {
-      // Swipe höger
-      document.querySelector('.forecast-cards').scrollBy({ left: -300, behavior: 'smooth' });
+        percentage = 100;
     }
-  }
+    
+    // Begränsa mellan 5% och 95%
+    percentage = Math.max(5, Math.min(95, percentage));
+    
+    const sunElement = document.getElementById('sun-position');
+    const currentTimeElement = document.getElementById('current-sun-time');
+    
+    if (sunElement) {
+        sunElement.style.left = `${percentage}%`;
+    }
+    
+    if (currentTimeElement) {
+        const hours = String(currentTime.getHours()).padStart(2, '0');
+        const minutes = String(currentTime.getMinutes()).padStart(2, '0');
+        currentTimeElement.textContent = `${hours}:${minutes}`;
+    }
+    
+    // Beräkna och visa dagljuslängd
+    const daylightHours = Math.floor(dayLength / (1000 * 60 * 60));
+    const daylightMinutes = Math.floor((dayLength % (1000 * 60 * 60)) / (1000 * 60));
+    const nightHours = 24 - daylightHours - 1;
+    const nightMinutes = 60 - daylightMinutes;
+    
+    const daylightElement = document.getElementById('daylight-hours');
+    const nightElement = document.getElementById('night-hours');
+    
+    if (daylightElement) {
+        daylightElement.textContent = `Dag: ${daylightHours}h ${daylightMinutes}m`;
+    }
+    
+    if (nightElement) {
+        nightElement.textContent = `Natt: ${nightHours}h ${nightMinutes}m`;
+    }
 }
+
+// Funktion för att hämta väderdata
+async function fetchWeatherData() {
+    const currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${CONFIG.city},${CONFIG.country}&appid=${CONFIG.apiKey}&units=${CONFIG.units}&lang=${CONFIG.language}`;
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${CONFIG.city},${CONFIG.country}&appid=${CONFIG.apiKey}&units=${CONFIG.units}&lang=${CONFIG.language}`;
+    
+    try {
+        const [currentResponse, forecastResponse] = await Promise.all([
+            fetch(currentUrl),
+            fetch(forecastUrl)
+        ]);
+        
+        if (!currentResponse.ok || !forecastResponse.ok) {
+            throw new Error('Kunde inte hämta väderdata');
+        }
+        
+        const currentData = await currentResponse.json();
+        const forecastData = await forecastResponse.json();
+        
+        return { current: currentData, forecast: forecastData };
+    } catch (error) {
+        console.error('Fel vid hämtning av väderdata:', error);
+        showError('Kunde inte hämta väderdata. Kontrollera internetanslutning.');
+        return null;
+    }
+}
+
+// Funktion för att uppdatera bakgrund baserat på väder
+function updateWeatherBackground(weatherCondition) {
+    const backgroundElement = document.getElementById('weather-background');
+    const condition = weatherCondition.toLowerCase();
+    
+    // Hitta rätt klass för väderförhållandet
+    let weatherClass = 'default';
+    for (const [key, value] of Object.entries(WEATHER_CLASSES)) {
+        if (condition.includes(key)) {
+            weatherClass = value;
+            break;
+        }
+    }
+    
+    // Ta bort alla väderklasser och lägg till rätt
+    backgroundElement.className = 'weather-background ' + weatherClass;
+}
+
+// Funktion för att översätta väderbeskrivning
+function translateWeatherDescription(description) {
+    const desc = description.toLowerCase();
+    for (const [key, value] of Object.entries(WEATHER_TRANSLATIONS)) {
+        if (desc.includes(key)) {
+            return value;
+        }
+    }
+    return description.charAt(0).toUpperCase() + description.slice(1);
+}
+
+// Funktion för att uppdatera aktuellt väder
+function updateCurrentWeather(data) {
+    if (!data) return;
+    
+    weatherData = data;
+    
+    // Uppdatera temperatur
+    document.getElementById('current-temp').textContent = Math.round(data.main.temp);
+    document.getElementById('feels-like-temp').textContent = `${Math.round(data.main.feels_like)}°`;
+    document.getElementById('brief-temp').textContent = `${Math.round(data.main.temp)}°`;
+    
+    // Uppdatera väderbeskrivning
+    const description = translateWeatherDescription(data.weather[0].description);
+    document.getElementById('weather-description').textContent = description;
+    document.getElementById('brief-condition').textContent = description;
+    
+    // Uppdatera väderdetaljer
+    document.getElementById('weather-details').textContent = 
+        `Vädret i Trollhättan är ${description.toLowerCase()} med en temperatur på ${Math.round(data.main.temp)}°C.`;
+    
+    // Uppdatera väderikon
+    const iconCode = data.weather[0].icon;
+    const iconElement = document.getElementById('weather-main-icon');
+    if (WEATHER_ICONS[iconCode]) {
+        iconElement.className = WEATHER_ICONS[iconCode];
+    }
+    
+    // Uppdatera väderstatistik
+    document.getElementById('wind-speed').textContent = `${Math.round(data.wind.speed)} m/s`;
+    document.getElementById('humidity').textContent = `${data.main.humidity}%`;
+    document.getElementById('pressure').textContent = `${data.main.pressure} hPa`;
+    document.getElementById('visibility').textContent = data.visibility ? `${Math.round(data.visibility / 1000)} km` : 'N/A';
+    
+    // Uppdatera soltider
+    const sunrise = new Date(data.sys.sunrise * 1000);
+    const sunset = new Date(data.sys.sunset * 1000);
+    
+    document.getElementById('sunrise-time').textContent = 
+        `${String(sunrise.getHours()).padStart(2, '0')}:${String(sunrise.getMinutes()).padStart(2, '0')}`;
+    
+    document.getElementById('sunset-time').textContent = 
+        `${String(sunset.getHours()).padStart(2, '0')}:${String(sunset.getMinutes()).padStart(2, '0')}`;
+    
+    // Uppdatera statistik
+    document.getElementById('temp-max').textContent = `${Math.round(data.main.temp_max)}°`;
+    document.getElementById('temp-min').textContent = `${Math.round(data.main.temp_min)}°`;
+    document.getElementById('wind-gust').textContent = data.wind.gust ? `${Math.round(data.wind.gust)} m/s` : 'N/A';
+    
+    // Uppdatera bakgrund baserat på väder
+    updateWeatherBackground(data.weather[0].main);
+    
+    // Uppdatera solposition nu
+    updateSunPosition(new Date());
+}
+
+// Funktion för att uppdatera prognos
+function updateForecast(data) {
+    if (!data || !data.list) return;
+    
+    forecastData = data;
+    const forecastDays = document.getElementById('forecast-days');
+    forecastDays.innerHTML = '';
+    
+    // Gruppera prognos per dag
+    const dailyForecasts = {};
+    data.list.forEach(item => {
+        const date = new Date(item.dt * 1000);
+        const dateKey = date.toISOString().split('T')[0];
+        
+        if (!dailyForecasts[dateKey]) {
+            dailyForecasts[dateKey] = [];
+        }
+        
+        dailyForecasts[dateKey].push(item);
+    });
+    
+    // Skapa prognos för nästa 5 dagar
+    const forecastDates = Object.keys(dailyForecasts).sort();
+    const next5Days = forecastDates.slice(1, 6); // Hoppa över idag
+    
+    next5Days.forEach(dateKey => {
+        const dayForecasts = dailyForecasts[dateKey];
+        const date = new Date(dateKey);
+        
+        // Hitta mittpunkten för dagen (kl 12)
+        const middayForecast = dayForecasts.find(item => {
+            const hour = new Date(item.dt * 1000).getHours();
+            return hour >= 11 && hour <= 13;
+        }) || dayForecasts[Math.floor(dayForecasts.length / 2)];
+        
+        // Beräkna medeltemperatur
+        const avgTemp = Math.round(
+            dayForecasts.reduce((sum, item) => sum + item.main.temp, 0) / dayForecasts.length
+        );
+        
+        // Skapa prognoselement
+        const forecastElement = document.createElement('div');
+        forecastElement.className = 'forecast-day fade-in';
+        
+        const dayName = date.toLocaleDateString('sv-SE', { weekday: 'short' });
+        const dayDate = date.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
+        const condition = translateWeatherDescription(middayForecast.weather[0].description);
+        const iconCode = middayForecast.weather[0].icon;
+        const iconClass = WEATHER_ICONS[iconCode] || 'fas fa-cloud';
+        
+        forecastElement.innerHTML = `
+            <div class="day-name">${dayName.toUpperCase()}</div>
+            <div class="day-date">${dayDate}</div>
+            <div class="day-icon"><i class="${iconClass}"></i></div>
+            <div class="day-temp">${avgTemp}°</div>
+            <div class="day-condition">${condition}</div>
+            <div class="day-details">
+                <div class="detail">
+                    <i class="fas fa-temperature-low"></i>
+                    <span>${Math.round(middayForecast.main.feels_like)}°</span>
+                </div>
+                <div class="detail">
+                    <i class="fas fa-wind"></i>
+                    <span>${Math.round(middayForecast.wind.speed)} m/s</span>
+                </div>
+                <div class="detail">
+                    <i class="fas fa-tint"></i>
+                    <span>${middayForecast.main.humidity}%</span>
+                </div>
+            </div>
+        `;
+        
+        forecastDays.appendChild(forecastElement);
+    });
+}
+
+// Funktion för att uppdatera luftkvalitet (simulerad - OpenWeatherMap kräver annat API)
+function updateAirQuality() {
+    // Simulerad luftkvalitetsdata
+    const aqi = Math.floor(Math.random() * 50) + 1; // 1-50 bra kvalitet
+    const pm25 = (Math.random() * 10).toFixed(1);
+    const pm10 = (Math.random() * 20).toFixed(1);
+    const ozone = Math.floor(Math.random() * 60) + 20;
+    
+    document.getElementById('aqi-value').textContent = aqi;
+    document.getElementById('pm25').textContent = `${pm25} µg/m³`;
+    document.getElementById('pm10').textContent = `${pm10} µg/m³`;
+    document.getElementById('ozone').textContent = ozone;
+    
+    let aqiDescription = '';
+    if (aqi <= 50) {
+        aqiDescription = 'Utmärkt luftkvalitet. Perfekt för utomhusaktiviteter.';
+    } else if (aqi <= 100) {
+        aqiDescription = 'God luftkvalitet. Normal för Trollhättan.';
+    } else if (aqi <= 150) {
+        aqiDescription = 'Något försämrad kvalitet. Känsliga personer bör vara försiktiga.';
+    } else {
+        aqiDescription = 'Dålig luftkvalitet. Begränsa utomhusvistelse.';
+    }
+    
+    document.getElementById('aqi-description').textContent = aqiDescription;
+}
+
+// Funktion för att visa felmeddelande
+function showError(message) {
+    const briefCondition = document.getElementById('brief-condition');
+    briefCondition.textContent = 'Kunde inte hämta väder';
+    briefCondition.style.color = 'var(--accent-red)';
+    
+    console.error('Väder Dashboard Fel:', message);
+}
+
+// Funktion för att uppdatera senast uppdaterad tid
+function updateLastUpdatedTime() {
+    const now = new Date();
+    lastUpdateTime = now;
+    
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    document.getElementById('last-updated-time').textContent = `${hours}:${minutes}`;
+}
+
+// Huvuduppdateringsfunktion
+async function updateWeatherDashboard() {
+    try {
+        // Visa laddningsindikator
+        const refreshBtn = document.getElementById('refresh-btn');
+        refreshBtn.classList.add('spin');
+        
+        const data = await fetchWeatherData();
+        
+        if (data) {
+            updateCurrentWeather(data.current);
+            updateForecast(data.forecast);
+            updateAirQuality();
+            updateLastUpdatedTime();
+        }
+        
+        // Dölj laddningsindikator
+        refreshBtn.classList.remove('spin');
+    } catch (error) {
+        console.error('Fel vid uppdatering:', error);
+        showError('Uppdatering misslyckades');
+        
+        const refreshBtn = document.getElementById('refresh-btn');
+        refreshBtn.classList.remove('spin');
+    }
+}
+
+// Funktion för att initiera dashboarden
+async function initDashboard() {
+    // Starta klockan
+    updateClock();
+    setInterval(updateClock, 1000);
+    
+    // Lägg till event listeners
+    document.getElementById('refresh-btn').addEventListener('click', updateWeatherDashboard);
+    
+    // Hantera forecast navigation
+    const forecastContainer = document.querySelector('.forecast-container');
+    const prevBtn = document.querySelector('.prev-btn');
+    const nextBtn = document.querySelector('.next-btn');
+    
+    if (prevBtn && nextBtn) {
+        prevBtn.addEventListener('click', () => {
+            forecastContainer.scrollBy({ left: -200, behavior: 'smooth' });
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            forecastContainer.scrollBy({ left: 200, behavior: 'smooth' });
+        });
+    }
+    
+    // Touch/swipe support för mobil
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    forecastContainer?.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    forecastContainer?.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    });
+    
+    function handleSwipe() {
+        const threshold = 50;
+        const diff = touchStartX - touchEndX;
+        
+        if (Math.abs(diff) > threshold) {
+            if (diff > 0) {
+                forecastContainer.scrollBy({ left: 200, behavior: 'smooth' });
+            } else {
+                forecastContainer.scrollBy({ left: -200, behavior: 'smooth' });
+            }
+        }
+    }
+    
+    // Initial uppdatering
+    await updateWeatherDashboard();
+    
+    // Sätt upp automatisk uppdatering
+    setInterval(updateWeatherDashboard, CONFIG.updateInterval);
+}
+
+// Starta dashboarden när sidan laddas
+document.addEventListener('DOMContentLoaded', initDashboard);
+
+// Exponera uppdateringsfunktionen globalt för manuella uppdateringar
+window.updateWeatherDashboard = updateWeatherDashboard;

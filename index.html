@@ -1,241 +1,362 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Professionellt Väder Dashboard för Trollhättan med realtidsdata">
-  <meta name="author" content="Abdirashid Muhammed">
-  <title>VäderDashboard Pro - Trollhättan</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌤️</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Professionellt Väder Dashboard för Trollhättan">
+    <meta name="author" content="Abdirashid Muhammed">
+    <title>Väder Dashboard Pro | Trollhättan</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 <body>
-  <!-- Säsongsbakgrund -->
-  <div class="seasonal-background" id="seasonal-background">
-    <div class="background-overlay"></div>
-  </div>
-  
-  <!-- Huvudcontainer -->
-  <main class="dashboard-container">
-    
-    <!-- Header med klocka och plats -->
-    <header class="dashboard-header">
-      <div class="header-content">
-        <div class="header-left">
-          <div class="time-display-container">
-            <div class="time-display" id="time">20:04:17</div>
-            <div class="date-display" id="date">IDAG · 3 JANUARI 2026</div>
-          </div>
+    <!-- Bakgrundscontainer för väderbilder -->
+    <div class="weather-background" id="weather-background">
+        <div class="background-overlay"></div>
+        <div class="weather-background-credit">
+            <i class="fas fa-camera"></i>
+            <span>Väderbaserad bakgrund • Trollhättan</span>
         </div>
-        
-        <div class="header-right">
-          <div class="location-display">
-            <i class="fas fa-map-marker-alt"></i>
-            <div class="location-text">
-              <h1>Trollhättan</h1>
-              <span class="location-subtitle">Sverige</span>
+    </div>
+
+    <!-- Huvudcontainer -->
+    <div class="dashboard-container">
+        <!-- Header med klocka och plats -->
+        <header class="dashboard-header">
+            <div class="header-top">
+                <div class="time-section">
+                    <div class="time-display" id="time">--:--:--</div>
+                    <div class="date-display" id="date">-- --- ----</div>
+                </div>
+                <div class="header-controls">
+                    <button class="refresh-btn" id="refresh-btn" title="Uppdatera väder">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Uppdatera</span>
+                    </button>
+                    <div class="last-updated">
+                        <i class="fas fa-clock"></i>
+                        <span>Senast: <span id="last-updated-time">--:--</span></span>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </header>
-    
-    <!-- Huvudväderkort -->
-    <section class="main-weather-card">
-      <div class="weather-current">
-        <div class="current-temp-container">
-          <div class="temp-main">
-            <span class="temp-value" id="current-temp">-5</span>
-            <span class="temp-unit">°C</span>
-          </div>
-          <div class="temp-feels">
-            Känns som <span id="feels-temp">-12°</span>
-          </div>
-        </div>
-        
-        <div class="current-condition">
-          <div class="condition-icon-large">
-            <i class="fas fa-snowflake" id="weather-icon"></i>
-          </div>
-          <div class="condition-details">
-            <h2 id="weather-condition">Lätt Snöfall</h2>
-            <p class="condition-subtitle" id="weather-description">Vinterväder med lätt snöfall</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="weather-stats">
-        <div class="stat-item">
-          <i class="fas fa-wind"></i>
-          <div class="stat-info">
-            <span class="stat-value" id="wind-speed">5</span>
-            <span class="stat-unit">m/s</span>
-            <span class="stat-label">Vind</span>
-          </div>
-        </div>
-        
-        <div class="stat-item">
-          <i class="fas fa-tint"></i>
-          <div class="stat-info">
-            <span class="stat-value" id="humidity">84</span>
-            <span class="stat-unit">%</span>
-            <span class="stat-label">Fuktighet</span>
-          </div>
-        </div>
-        
-        <div class="stat-item">
-          <i class="fas fa-compress-alt"></i>
-          <div class="stat-info">
-            <span class="stat-value" id="pressure">1024</span>
-            <span class="stat-unit">hPa</span>
-            <span class="stat-label">Lufttryck</span>
-          </div>
-        </div>
-        
-        <div class="stat-item">
-          <i class="fas fa-eye"></i>
-          <div class="stat-info">
-            <span class="stat-value" id="visibility">10</span>
-            <span class="stat-unit">km</span>
-            <span class="stat-label">Sikt</span>
-          </div>
-        </div>
-      </div>
-    </section>
-    
-    <!-- Soluppgång/solnedgång sektion -->
-    <section class="sun-section">
-      <div class="section-title">
-        <i class="fas fa-sun"></i>
-        <h2>Soluppgång & Solnedgång</h2>
-      </div>
-      
-      <div class="sun-timeline">
-        <div class="sun-event sunrise">
-          <div class="sun-icon">
-            <i class="fas fa-sunrise"></i>
-          </div>
-          <div class="sun-info">
-            <div class="sun-label">SOLUPPGÅNG</div>
-            <div class="sun-time" id="sunrise-time">08:56</div>
-            <div class="sun-note">Dagljus: <span id="daylight-duration">6h 36m</span></div>
-          </div>
-        </div>
-        
-        <div class="sun-progress">
-          <div class="sun-path">
-            <div class="sun-position" id="sun-position"></div>
-            <div class="sun-marker now">
-              <div class="marker-dot"></div>
-              <div class="marker-label">Nu</div>
+
+            <div class="header-bottom">
+                <div class="location-info">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h1 class="city-name">Trollhättan</h1>
+                    <span class="country-name">Sverige</span>
+                </div>
+                <div class="current-weather-brief">
+                    <div class="brief-temp" id="brief-temp">--°</div>
+                    <div class="brief-condition" id="brief-condition">Laddar...</div>
+                </div>
             </div>
-          </div>
-          <div class="sun-hours">
-            <span>00:00</span>
-            <span>12:00</span>
-            <span>24:00</span>
-          </div>
-        </div>
-        
-        <div class="sun-event sunset">
-          <div class="sun-icon">
-            <i class="fas fa-sunset"></i>
-          </div>
-          <div class="sun-info">
-            <div class="sun-label">SOLNEDGÅNG</div>
-            <div class="sun-time" id="sunset-time">15:32</div>
-            <div class="sun-note">Natt: <span id="night-duration">17h 24m</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-    
-    <!-- 5-dagarsprognos -->
-    <section class="forecast-section">
-      <div class="section-title">
-        <i class="fas fa-calendar-alt"></i>
-        <h2>5-DAGARS PROGNOS</h2>
-        <span class="section-subtitle">Trollhättan</span>
-      </div>
-      
-      <div class="forecast-container">
-        <div class="forecast-cards" id="forecast-cards">
-          <!-- Väderkort genereras här -->
-        </div>
-        
-        <div class="forecast-navigation">
-          <button class="nav-btn prev-btn" aria-label="Föregående">
-            <i class="fas fa-chevron-left"></i>
-          </button>
-          <button class="nav-btn next-btn" aria-label="Nästa">
-            <i class="fas fa-chevron-right"></i>
-          </button>
-        </div>
-      </div>
-    </section>
-    
-    <!-- Footer -->
-    <footer class="dashboard-footer">
-      <div class="footer-grid">
-        <div class="footer-column">
-          <div class="footer-title">
-            <i class="fas fa-sync-alt"></i>
-            <h3>Uppdatering</h3>
-          </div>
-          <p>Automatisk uppdatering var 5:e minut</p>
-          <p class="update-time">Senast: <span id="last-updated">20:04</span></p>
-        </div>
-        
-        <div class="footer-column">
-          <div class="footer-title">
-            <i class="fas fa-database"></i>
-            <h3>Datakälla</h3>
-          </div>
-          <p>Väderdata från OpenWeatherMap API</p>
-          <p>Bakgrundsbilder från Unsplash</p>
-        </div>
-        
-        <div class="footer-column designer-info">
-          <div class="footer-title">
-            <i class="fas fa-palette"></i>
-            <h3>Designer</h3>
-          </div>
-          <div class="designer-card">
-            <div class="designer-name">Abdirashid Muhammed</div>
-            <div class="designer-contact">
-              <a href="mailto:rashkow@hotmail.com" class="contact-link">
-                <i class="fas fa-envelope"></i> rashkow@hotmail.com
-              </a>
-              <a href="tel:+46700184201" class="contact-link">
-                <i class="fas fa-phone"></i> +46 70 018 42 01
-              </a>
+        </header>
+
+        <!-- Huvudvädersektion -->
+        <main class="weather-main">
+            <!-- Vänster sektion: Detaljerat väder -->
+            <section class="weather-details">
+                <div class="weather-card current-weather-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-cloud-sun"></i> Nuvarande Väder</h2>
+                        <div class="card-subtitle">Realtidsdata för Trollhättan</div>
+                    </div>
+                    
+                    <div class="current-weather-content">
+                        <div class="temperature-section">
+                            <div class="main-temperature">
+                                <span class="temp-value" id="current-temp">--</span>
+                                <span class="temp-unit">°C</span>
+                            </div>
+                            <div class="feels-like">
+                                Känns som <span id="feels-like-temp">--°</span>
+                            </div>
+                        </div>
+
+                        <div class="weather-condition-section">
+                            <div class="condition-icon-large">
+                                <i class="fas fa-sun" id="weather-main-icon"></i>
+                            </div>
+                            <div class="condition-text">
+                                <h3 id="weather-description">Laddar väder...</h3>
+                                <p class="condition-details" id="weather-details">Väderdetaljer laddas...</p>
+                            </div>
+                        </div>
+
+                        <div class="weather-stats-grid">
+                            <div class="weather-stat">
+                                <div class="stat-icon">
+                                    <i class="fas fa-wind"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-label">Vind</div>
+                                    <div class="stat-value" id="wind-speed">-- m/s</div>
+                                </div>
+                            </div>
+
+                            <div class="weather-stat">
+                                <div class="stat-icon">
+                                    <i class="fas fa-tint"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-label">Fuktighet</div>
+                                    <div class="stat-value" id="humidity">--%</div>
+                                </div>
+                            </div>
+
+                            <div class="weather-stat">
+                                <div class="stat-icon">
+                                    <i class="fas fa-compress-alt"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-label">Lufttryck</div>
+                                    <div class="stat-value" id="pressure">-- hPa</div>
+                                </div>
+                            </div>
+
+                            <div class="weather-stat">
+                                <div class="stat-icon">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-label">Sikt</div>
+                                    <div class="stat-value" id="visibility">-- km</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Soluppgång/solnedgång sektion -->
+                <div class="weather-card sun-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-sun"></i> Soltider</h2>
+                    </div>
+                    
+                    <div class="sun-times">
+                        <div class="sun-time sunrise">
+                            <div class="sun-icon">
+                                <i class="fas fa-sunrise"></i>
+                            </div>
+                            <div class="sun-info">
+                                <div class="sun-label">SOLUPPGÅNG</div>
+                                <div class="sun-time-value" id="sunrise-time">--:--</div>
+                                <div class="sun-duration" id="daylight-hours">Dag: --h --m</div>
+                            </div>
+                        </div>
+
+                        <div class="sun-progress-bar">
+                            <div class="sun-track">
+                                <div class="sun-position" id="sun-position"></div>
+                            </div>
+                            <div class="sun-progress-labels">
+                                <span>00:00</span>
+                                <span id="current-sun-time">--:--</span>
+                                <span>24:00</span>
+                            </div>
+                        </div>
+
+                        <div class="sun-time sunset">
+                            <div class="sun-icon">
+                                <i class="fas fa-sunset"></i>
+                            </div>
+                            <div class="sun-info">
+                                <div class="sun-label">SOLNEDGÅNG</div>
+                                <div class="sun-time-value" id="sunset-time">--:--</div>
+                                <div class="sun-duration" id="night-hours">Natt: --h --m</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Höger sektion: 5-dagars prognos -->
+            <section class="weather-forecast">
+                <div class="weather-card forecast-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-calendar-alt"></i> 5-Dagars Prognos</h2>
+                        <div class="card-subtitle">Veckans väder i Trollhättan</div>
+                    </div>
+
+                    <div class="forecast-container">
+                        <div class="forecast-days" id="forecast-days">
+                            <!-- Prognosdagar kommer här via JavaScript -->
+                            <div class="forecast-day loading">
+                                <div class="day-name">---</div>
+                                <div class="day-date">--/--</div>
+                                <div class="day-icon"><i class="fas fa-spinner fa-spin"></i></div>
+                                <div class="day-temp">--°</div>
+                                <div class="day-condition">Laddar...</div>
+                                <div class="day-details">
+                                    <div class="detail">
+                                        <i class="fas fa-temperature-low"></i>
+                                        <span>--°</span>
+                                    </div>
+                                    <div class="detail">
+                                        <i class="fas fa-wind"></i>
+                                        <span>-- m/s</span>
+                                    </div>
+                                    <div class="detail">
+                                        <i class="fas fa-tint"></i>
+                                        <span>--%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="forecast-navigation">
+                        <button class="nav-btn prev-btn" aria-label="Föregående dagar">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="nav-btn next-btn" aria-label="Nästa dagar">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Luftkvalitet och extra info -->
+                <div class="weather-card air-quality-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-wind"></i> Luftkvalitet</h2>
+                    </div>
+                    
+                    <div class="air-quality-content">
+                        <div class="aqi-index">
+                            <div class="aqi-value" id="aqi-value">--</div>
+                            <div class="aqi-label">AQI</div>
+                        </div>
+                        <div class="aqi-description" id="aqi-description">
+                            Luftkvalitetsdata laddas...
+                        </div>
+                        <div class="aqi-components">
+                            <div class="component">
+                                <span class="comp-name">PM2.5</span>
+                                <span class="comp-value" id="pm25">-- µg/m³</span>
+                            </div>
+                            <div class="component">
+                                <span class="comp-name">PM10</span>
+                                <span class="comp-value" id="pm10">-- µg/m³</span>
+                            </div>
+                            <div class="component">
+                                <span class="comp-name">Ozon</span>
+                                <span class="comp-value" id="ozone">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Väderstatistik -->
+                <div class="weather-card statistics-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-line"></i> Statistik</h2>
+                    </div>
+                    
+                    <div class="statistics-content">
+                        <div class="stat-item">
+                            <div class="stat-label">Max idag</div>
+                            <div class="stat-value" id="temp-max">--°</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Min idag</div>
+                            <div class="stat-value" id="temp-min">--°</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Vindstöt</div>
+                            <div class="stat-value" id="wind-gust">-- m/s</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">UV-index</div>
+                            <div class="stat-value" id="uv-index">--</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="dashboard-footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <i class="fas fa-cloud-sun"></i>
+                        <span class="logo-text">VäderDashboard Pro</span>
+                    </div>
+                    <p class="footer-description">
+                        Professionellt väderinstrumentpanel för Trollhättan med realtidsdata
+                    </p>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Datakällor</h3>
+                    <ul class="data-sources">
+                        <li><i class="fas fa-database"></i> OpenWeatherMap API</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Trollhättans position</li>
+                        <li><i class="fas fa-cloud"></i> Realtidsväderdata</li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Kontakt</h3>
+                    <div class="designer-info">
+                        <div class="designer-avatar">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="designer-details">
+                            <div class="designer-name">Abdirashid Muhammed</div>
+                            <div class="designer-contact">
+                                <a href="mailto:rashkow@hotmail.com">
+                                    <i class="fas fa-envelope"></i> rashkow@hotmail.com
+                                </a>
+                                <a href="tel:+46700184201">
+                                    <i class="fas fa-phone"></i> +46 70 018 42 01
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Enheter</h3>
+                    <div class="device-support">
+                        <div class="device-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Mobiler</span>
+                        </div>
+                        <div class="device-icon">
+                            <i class="fas fa-tablet-alt"></i>
+                            <span>Tablets</span>
+                        </div>
+                        <div class="device-icon">
+                            <i class="fas fa-desktop"></i>
+                            <span>Desktop</span>
+                        </div>
+                        <div class="device-icon">
+                            <i class="fas fa-tv"></i>
+                            <span>TV</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-        
-        <div class="footer-column">
-          <div class="footer-title">
-            <i class="fas fa-mobile-alt"></i>
-            <h3>Responsiv</h3>
-          </div>
-          <p>Optimiserad för alla enheter</p>
-          <div class="device-icons">
-            <i class="fas fa-mobile-alt"></i>
-            <i class="fas fa-tablet-alt"></i>
-            <i class="fas fa-desktop"></i>
-            <i class="fas fa-tv"></i>
-          </div>
-        </div>
-      </div>
-      
-      <div class="footer-bottom">
-        <p>© 2026 VäderDashboard Pro • Trollhättan • All väderdata i realtid</p>
-      </div>
-    </footer>
-  </main>
-  
-  <script src="script.js"></script>
+
+            <div class="footer-bottom">
+                <div class="copyright">
+                    © 2024 VäderDashboard Pro • Trollhättan • Alla rättigheter förbehållna
+                </div>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Integritetspolicy</a>
+                    <a href="#" class="footer-link">Användarvillkor</a>
+                    <a href="#" class="footer-link">API-dokumentation</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
 </body>
 </html>
